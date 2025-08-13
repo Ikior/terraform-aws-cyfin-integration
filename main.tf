@@ -1,4 +1,4 @@
-# main.tf
+# C:\IKIOR\terraform-aws-cyfin-integration\main.tf (Corrected Version)
 
 terraform {
   required_providers {
@@ -9,27 +9,29 @@ terraform {
   }
 }
 
-# This module from the official Terraform AWS provider does the heavy lifting
-# of creating the IAM role according to best practices.
-module "iam_role_for_cyfin" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role"
+# This is the corrected community module block.
+# It now points to the correct 'iam-assumable-role' submodule.
+module "cyfin_assumable_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-assumable-role"
   version = "5.39.1" # Pinning the version ensures stability
 
+  # The name of the role that will be created in the user's account
   role_name = "CyFin-ReadOnly-Role"
+  
+  # A list containing YOUR AWS Account ID. This is who is trusted.
+  trusted_role_arns = [
+    "arn:aws:iam::123456789012:root" # IMPORTANT: Replace with YOUR backend's AWS Account ID
+  ]
 
-  # This is the most critical security part. It defines who can assume this role.
-  # It allows YOUR AWS account to assume the role, but ONLY if they provide the
-  # correct external_id that your application generated.
-  assume_role_policy = jsonencode({
+  # This is the critical security condition.
+  # It ensures the role can only be assumed if your app provides the correct secret ID.
+  custom_role_trust_policy = jsonencode({
     Version   = "2012-10-17",
     Statement = [
       {
-        Effect = "Allow",
-        Action = "sts:AssumeRole",
-        Principal = {
-          # IMPORTANT: Replace with YOUR backend's AWS Account ID
-          AWS = "arn:aws:iam::123456789012:root"
-        },
+        Effect    = "Allow",
+        Action    = "sts:AssumeRole",
+        Principal = { AWS = "arn:aws:iam::123456789012:root" }, # Replace with YOUR AWS Account ID
         Condition = {
           StringEquals = { "sts:ExternalId" = var.external_id }
         }
@@ -38,8 +40,6 @@ module "iam_role_for_cyfin" {
   })
 
   # Attach the standard, pre-built AWS read-only policies.
-  # This grants CyFin permission to list and describe your resources without
-  # being able to change anything.
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/SecurityAudit",
     "arn:aws:iam::aws:policy/job-function/ViewOnlyAccess"
