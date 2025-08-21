@@ -9,7 +9,7 @@ resource "aws_iam_role" "cyfin_readonly_role" {
       {
         Effect    = "Allow",
         Action    = "sts:AssumeRole",
-        Principal = { AWS = "arn:aws:iam::593543055553:root" }, # IMPORTANT: Replace with YOUR backend's AWS Account ID
+        Principal = { AWS = "arn:aws:iam::003457291014:root" }, # IMPORTANT: shadowId
         Condition = {
           StringEquals = { "sts:ExternalId" = var.external_id }
         }
