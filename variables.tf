@@ -1,11 +1,5 @@
-# variables.tf
-variable "cyfin_api_token" {
-  type        = string
-  description = "Your personal Onboarding Token provided by the CyFin dashboard."
-  sensitive   = true # This hides it from logs
-}
-
 variable "external_id" {
+  description = "The unique External ID provided by the CyFin platform for secure role assumption. You can find this on the 'Connect Account' page in CyFin."
   type        = string
-  description = "The External ID for this integration, also provided by the CyFin dashboard."
+  sensitive   = true # Marks the variable as sensitive to prevent it from being shown in logs.
 }
